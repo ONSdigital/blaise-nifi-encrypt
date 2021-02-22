@@ -1,13 +1,16 @@
 package encryption
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"time"
+
 	"github.com/ONSDigital/blaise-mi-extract/pkg/util"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
-	"io"
-	"os"
 )
 
 type Repository interface {
@@ -53,6 +56,14 @@ func (s service) EncryptFile(encryptRequest util.Encrypt) error {
 	if err != nil {
 		log.Err(err).Msgf("cannot read public key")
 		return err
+	}
+	// Check if public key signatures have expired
+	for _, identity := range recipient.Identities {
+		if identity.SelfSignature.KeyExpired(time.Now()) {
+			err := fmt.Errorf("Key has expired")
+			log.Err(err).Msgf("Cannot use public key for '%s'", identity.Name)
+			return err
+		}
 	}
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
