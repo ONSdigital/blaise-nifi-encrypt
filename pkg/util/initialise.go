@@ -1,12 +1,13 @@
 package util
 
 import (
-	"github.com/mattn/go-colorable"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mattn/go-colorable"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 	Debug            = "DEBUG"
 )
 
-func Initialise() {
+func ConfigureLogging() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// change log format
@@ -35,5 +36,4 @@ func Initialise() {
 			zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		}
 	}
-
 }

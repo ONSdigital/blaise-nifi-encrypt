@@ -1,26 +1,7 @@
-package util
+package models
 
-import (
-	"time"
-)
+import "time"
 
-// common structures
-
-const (
-	ExtractOutput   = "EXTRACT_OUTPUT"
-	EncryptOutput   = "ENCRYPT_OUTPUT"
-	ZipOutput       = "ZIP_OUTPUT"
-	UseGPGExtension = "GPG_EXTENSION"
-
-	PublicKeyFile   = "PUBLIC_KEY"
-	Server          = "DB_SERVER"
-	User            = "DB_USER"
-	Password        = "DB_PASSWORD"
-	Database        = "DB_DATABASE"
-	DefaultDatabase = "blase"
-)
-
-// google storage events data
 type GCSEvent struct {
 	Kind                    string                 `json:"kind"`
 	ID                      string                 `json:"id"`
@@ -53,20 +34,4 @@ type GCSEvent struct {
 	}
 	KMSKeyName    string `json:"kmsKeyName"`
 	ResourceState string `json:"resourceState"`
-}
-
-type Zip struct {
-	FileName     string
-	FromLocation string
-	ToLocation   string
-	DeleteFile   bool
-}
-
-type Encrypt struct {
-	KeyFile              string
-	FileName             string
-	Location             string
-	EncryptedDestination string
-	DeleteFile           bool
-	UseGPGExtension      bool
 }
