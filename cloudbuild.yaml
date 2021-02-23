@@ -1,66 +1,13 @@
 steps:
   - name: "gcr.io/cloud-builders/gcloud"
-    id: "create zip from source"
-    entrypoint: "/bin/bash"
-    args:
-      - "-c"
-      - |
-        set -x && \
-        apt-get update && \
-        apt-get install -y zip && \
-        ls && \
-        zip -r /mnt/data/blaise-mi-extract.zip ./*
-    volumes:
-      - name: "data"
-        path: /mnt/data
-
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: "push zip to functions source bucket"
-    entrypoint: "/bin/bash"
-    args:
-      - "-c"
-      - |
-        gsutil cp /mnt/data/blaise-mi-extract.zip gs://ons-blaise-$_ENV-blaise-cloud-functions-source/
-    volumes:
-      - name: "data"
-        path: /mnt/data
-
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: "Trigger deploy of ExtractFunction from new zip"
-    waitFor: ["push zip to functions source bucket"]
-    args:
-    - functions
-    - deploy
-    - ExtractFunction 
-    - --source=gs://ons-blaise-$_ENV-blaise-cloud-functions-source/blaise-mi-extract.zip
-    - --entry-point=ExtractFunction
-    - --region=europe-west2 
-    - --runtime=go113
-    - --trigger-event=google.pubsub.topic.publish
-    - --trigger-resource=mi-extract-topic
-
-  - name: "gcr.io/cloud-builders/gcloud"
     id: "Trigger deploy of EncryptFunction from new zip"
-    waitFor: ["push zip to functions source bucket"]
+    entrypoint: "/bin/bash"
     args:
-    - functions
-    - deploy
-    - EncryptFunction 
-    - --source=gs://ons-blaise-$_ENV-blaise-cloud-functions-source/blaise-mi-extract.zip
-    - --region=europe-west2 
-    - --runtime=go113
-    - --trigger-event=google.storage.object.finalize
-    - --trigger-resource=ons-blaise-$_ENV-encrypt
-
-  - name: "gcr.io/cloud-builders/gcloud"
-    id: "Trigger deploy of ZipFunction from new zip"
-    waitFor: ["push zip to functions source bucket"]
-    args:
-    - functions
-    - deploy
-    - ZipFunction
-    - --source=gs://ons-blaise-$_ENV-blaise-cloud-functions-source/blaise-mi-extract.zip
-    - --region=europe-west2 
-    - --runtime=go113
-    - --trigger-event=google.storage.object.finalize
-    - --trigger-resource=ons-blaise-$_ENV-zip
+      - "-c"
+      - |
+        gcloud functions deploy NiFiEncryptFunction \
+          --runtime go113 \
+          --region=europe-west2 \
+          --trigger-event=google.storage.object.finalize \
+          --trigger-resource=$$NIFI_STAGING_BUCKET \
+          --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$$ENV-key.gpg',ENCRYPTION_DESTINATION='$$NIFI_BUCKET'
