@@ -9,5 +9,5 @@ steps:
           --runtime go113 \
           --region=europe-west2 \
           --trigger-event=google.storage.object.finalize \
-          --trigger-resource=$$NIFI_STAGING_BUCKET \
-          --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$$ENV-key.gpg',ENCRYPTION_DESTINATION='$$NIFI_BUCKET'
+          --trigger-resource=$_NIFI_STAGING_BUCKET \
+          --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$_ENV-key.gpg',ENCRYPTION_DESTINATION='$_NIFI_BUCKET'
