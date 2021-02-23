@@ -1,12 +1,12 @@
 package google
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
-	"github.com/rs/zerolog/log"
 	"io"
 	"os"
-	"time"
+
+	"cloud.google.com/go/storage"
+	"github.com/rs/zerolog/log"
 )
 
 type Storage struct {
@@ -53,22 +53,6 @@ func (gs *Storage) CloseFile() {
 		}
 		log.Debug().Msg("closed bucket writer")
 	}
-}
-
-func (gs *Storage) DeleteFile(file, directory string) error {
-
-	ctx, cancel := context.WithTimeout(gs.ctx, time.Second*10)
-	defer cancel()
-
-	o := gs.client.Bucket(directory).Object(file)
-	if err := o.Delete(ctx); err != nil {
-		log.Warn().Msgf("delete of file %s fromm directory: %s failed", file, directory)
-		return err
-	}
-
-	log.Debug().Msgf("file: %s/%s deleted", directory, file)
-
-	return nil
 }
 
 func (gs Storage) GetReader(file, directory string) (io.ReadCloser, error) {
