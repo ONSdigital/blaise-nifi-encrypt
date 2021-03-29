@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func (client *Client) patch(payload []byte, url string) (string, error) {
-	req, err := client.HTTP.NewRequest(http.MethodPatch, url, bytes.NewBuffe(payload))
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		return "", err
