@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/datadeliverystatus"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/encryption"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/storage/google"
@@ -38,7 +39,7 @@ func loadConfig(name, location string) models.Encrypt {
 }
 
 // handles event from item arriving in the encrypt bucket
-func HandleEncryptionRequest(ctx context.Context, name, location string) error {
+func HandleEncryptionRequest(ctx context.Context, name, location string, dataDeliveryStatusClient datadeliverystatus.Client) error {
 	log.Info().
 		Str("location", location).
 		Str("file", name).
@@ -51,8 +52,15 @@ func HandleEncryptionRequest(ctx context.Context, name, location string) error {
 
 	if err := encrypt.EncryptFile(encryptRequest); err != nil {
 		log.Warn().Msg("encrypt failed")
+		_, err := dataDeliveryStatusClient.Error("errored", name, err.Error())
+		if err != nil {
+			log.Error().Msgf("Updating data delivery status to 'errored' failed: %s", err.Error())
+		}
 		return err
 	}
-
+	_, err := dataDeliveryStatusClient.Update("encrypted", name)
+	if err != nil {
+		log.Error().Msgf("Updating data delivery status to 'encrypted' failed: %s", err.Error())
+	}
 	return nil
 }
