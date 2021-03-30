@@ -2,6 +2,7 @@ package blaise_nifi_encrypt
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -19,6 +20,7 @@ func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
 		Config: &datadeliverystatus.Config{
 			BaseURL: os.Getenv("DDS_URL"),
 		},
+		HTTP: &http.Client{},
 	}
 	_, err := dataDeliveryStatusClient.Update(e.Name, "in_staging")
 	if err != nil {
