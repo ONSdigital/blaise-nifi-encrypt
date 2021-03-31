@@ -10,4 +10,4 @@ steps:
           --region=europe-west2 \
           --trigger-event=google.storage.object.finalize \
           --trigger-resource=$_NIFI_STAGING_BUCKET \
-          --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$_ENV-key.gpg',ENCRYPTION_DESTINATION='$_NIFI_BUCKET'
+          --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$_ENV-key.gpg',ENCRYPTION_DESTINATION='$_NIFI_BUCKET,DDS_URL='$_ENV_DDS_URL'
