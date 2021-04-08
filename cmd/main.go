@@ -10,7 +10,7 @@ import (
 
 // emulates the cloud functions
 func main() {
-	funcframework.RegisterEventFunction("/encrypt", funcs.EncryptFunction)
+	funcframework.RegisterEventFunction("/encrypt", funcs.NiFiEncryptFunction)
 
 	// Use PORT environment variable, or default to 8080.
 	port := "8080"
