@@ -11,7 +11,7 @@ or storage considerations.
 
 ## Configuration
 
-### Google Functions Region Setting
+### Google Functions region setting
 
 Set the default functions region:
 
@@ -19,7 +19,7 @@ Set the default functions region:
 
 Otherwise, functions will be created somewhere far away in the ether...
 
-### Environment Variables
+### Environment variables
 
 The following environment variables are available (see the testing section for details on how to create buckets):
 
@@ -35,7 +35,7 @@ If you want pretty coloured output for local testing use `Terminal`
 
 * `Debug=True|False|NotSet` - set debugging
 
-### Manual deploy
+## Manual deploy
 
 ```sh
 gcloud functions deploy NiFiEncryptFunction \
@@ -45,3 +45,7 @@ gcloud functions deploy NiFiEncryptFunction \
   --trigger-resource="${NIFI_STAGING_BUCKET}" \
   --set-env-vars PUBLIC_KEY="./serverless_function_source_code/pkg/encryption/keys/${ENV}-key.gpg,ENCRYPTION_DESTINATION=${NIFI_BUCKET}"
 ```
+
+## Encryption key management
+
+The CIA team are responsible for generating the PGP encryption keys. When they expire the CIA team will send us new public keys, they will need to [overwrite the existing public keys in this repository](https://github.com/ONSdigital/blaise-nifi-encrypt/tree/main/pkg/encryption/keys).
