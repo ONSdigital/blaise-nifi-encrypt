@@ -52,15 +52,15 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 
 	if err := encrypt.EncryptFile(encryptRequest); err != nil {
 		log.Warn().Msg("encrypt failed")
-		_, err := dataDeliveryStatusClient.Error("errored", name, err.Error())
-		if err != nil {
-			log.Error().Msgf("Updating data delivery status to 'errored' failed: %s", err.Error())
+		_, ddsErr := dataDeliveryStatusClient.Error("errored", name, err.Error())
+		if ddsErr != nil {
+			log.Error().Msgf("Updating data delivery status to 'errored' failed: %s", ddsErr.Error())
 		}
 		return err
 	}
-	_, err := dataDeliveryStatusClient.Update("encrypted", name)
-	if err != nil {
-		log.Error().Msgf("Updating data delivery status to 'encrypted' failed: %s", err.Error())
+	_, ddsErr := dataDeliveryStatusClient.Update("encrypted", name)
+	if ddsErr != nil {
+		log.Error().Msgf("Updating data delivery status to 'encrypted' failed: %s", ddsErr.Error())
 	}
 	return nil
 }
