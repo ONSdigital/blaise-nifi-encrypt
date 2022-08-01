@@ -71,11 +71,13 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
 	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true}, nil)
 	if err != nil {
+        log.Err(err).Msgf("failed to set up encryption: '%s'", err)
 		return err
 	}
 
 	defer wc.Close()
 	if _, err := io.Copy(wc, r); err != nil {
+        log.Err(err).Msgf("failed to fetch content and encrypt: '%s'. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime", err)
 		return err
 	}
 
