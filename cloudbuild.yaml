@@ -6,7 +6,7 @@ steps:
       - "-c"
       - |
         gcloud functions deploy NiFiEncryptFunction \
-          --runtime go113 \
+          --runtime go116 \
           --region=europe-west2 \
           --trigger-event=google.storage.object.finalize \
           --trigger-resource=$_NIFI_STAGING_BUCKET \
