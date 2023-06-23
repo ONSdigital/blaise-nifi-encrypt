@@ -1,6 +1,6 @@
 module github.com/ONSDigital/blaise-nifi-encrypt
 
-go 1.16
+go 1.19
 
 require (
 	cloud.google.com/go v0.78.0 // indirect
