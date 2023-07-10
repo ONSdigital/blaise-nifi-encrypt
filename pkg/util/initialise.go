@@ -12,9 +12,9 @@ import (
 
 const (
 	LogFormat string = "LOG_FORMAT"
-	Terminal         = "Terminal"
-	Json             = "Json"
-	Debug            = "DEBUG"
+	Terminal  string = "Terminal"
+	Json      string = "Json"
+	Debug     string = "DEBUG"
 )
 
 func ConfigureLogging() {
