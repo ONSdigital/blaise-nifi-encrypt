@@ -17,6 +17,12 @@ type Client struct {
 	HTTP   *http.Client
 }
 
+type DataDeliveryStatus interface {
+	patch([]byte, string) (string, error)
+	Update(string, string) (string, error)
+	Error(string, string, string) (string, error)
+}
+
 func (client *Client) patch(payload []byte, url string) (string, error) {
 	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
