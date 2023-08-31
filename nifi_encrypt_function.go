@@ -18,6 +18,7 @@ func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
 	client, err := idtoken.NewClient(ctx, os.Getenv("CLIENT_ID"))
 	if err != nil {
 		log.Error().Msgf("Could not get IAP token for DDS: %s", err.Error())
+		return err
 	}
 	util.ConfigureLogging()
 	dataDeliveryStatusClient := datadeliverystatus.Client{
