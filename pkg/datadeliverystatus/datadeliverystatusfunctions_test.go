@@ -2,6 +2,7 @@ package datadeliverystatus
 
 import (
 	"net/http"
+	"os"
 	"testing"
 )
 
@@ -30,7 +31,7 @@ func TestClient_Update(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Getenv("DDS_URL")
 			client := &Client{
-				Config: {BaseURL string: ""},
+				Config: {BaseURL: ""},
 				HTTP:   tt.fields.HTTP,
 			}
 			got, err := client.Update(tt.args.state, tt.args.fileName)

@@ -2,9 +2,12 @@ package blaise_nifi_encrypt
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"cloud.google.com/go/functions/metadata"
+	http_mocks "github.com/ONSDigital/blaise-nifi-encrypt/nifi_encrypt_function_mocks"
+	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/datadeliverystatus"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 )
 
@@ -52,4 +55,37 @@ func TestNiFiEncryptFunction(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_createDataDeliveryStatusClient(t *testing.T) {
+	tests := []struct {
+		name    string
+		client  *HTTPClient
+		want    datadeliverystatus.Client
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name:    "DDS URL is not set up",
+			client:  &http_mocks.NewHTTPClient(),
+			want:    datadeliverystatus.Client{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := createDataDeliveryStatusClient(tt.client)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("createDataDeliveryStatusClient() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("createDataDeliveryStatusClient() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func NewHTTPClient() {
+	panic("unimplemented")
 }
