@@ -13,22 +13,21 @@ func Test_loadConfig(t *testing.T) {
 		location string
 	}
 	tests := []struct {
-		name         string
-		args         args
-		want         models.Encrypt
-		wantErr      bool
-		desiredError string
+		name          string
+		args          args
+		want          models.Encrypt
+		expectedError string
+		wantErr       bool
 	}{
-		// TODO: Add test cases.\
 		{
 			name: "ENCRYPTION_DESTINATION environment variable is not set",
 			args: args{
 				name:     "test.txt",
 				location: "/home/user",
 			},
-			want:         models.Encrypt{},
-			wantErr:      true,
-			desiredError: "the ENCRYPTION_DESTINATION environment variable has not been set",
+			want:          models.Encrypt{},
+			expectedError: "the ENCRYPTION_DESTINATION environment variable has not been set",
+			wantErr:       true,
 		},
 		{
 			name: "ENCRYPTION_DESTINATION environment variable is an empty string",
@@ -36,9 +35,9 @@ func Test_loadConfig(t *testing.T) {
 				name:     "test.txt",
 				location: "/home/user",
 			},
-			want:         models.Encrypt{},
-			wantErr:      true,
-			desiredError: "the ENCRYPTION_DESTINATION environment variable is an empty string",
+			want:          models.Encrypt{},
+			expectedError: "the ENCRYPTION_DESTINATION environment variable is an empty string",
+			wantErr:       true,
 		},
 		{
 			name: "PUBLIC_KEY environment variable is not set",
@@ -46,8 +45,9 @@ func Test_loadConfig(t *testing.T) {
 				name:     "test.txt",
 				location: "/home/user",
 			},
-			want:    models.Encrypt{},
-			wantErr: true,
+			want:          models.Encrypt{},
+			expectedError: "the PUBLIC_KEY environment variable has not been set",
+			wantErr:       true,
 		},
 		{
 			name: "PUBLIC_KEY environment variable is an empty string",
@@ -55,8 +55,9 @@ func Test_loadConfig(t *testing.T) {
 				name:     "test.txt",
 				location: "/home/user",
 			},
-			want:    models.Encrypt{},
-			wantErr: true,
+			want:          models.Encrypt{},
+			expectedError: "the PUBLIC_KEY environment variable is an empty string",
+			wantErr:       true,
 		},
 		{
 			name: "ENCRYPTION_DESTINATION and PUBLIC_KEY environment variables are set",
@@ -88,7 +89,7 @@ func Test_loadConfig(t *testing.T) {
 			}
 
 			got, err := loadConfig(tt.args.name, tt.args.location)
-			if ((err != nil) != tt.wantErr) && (err.Error() == tt.desiredError) {
+			if ((err != nil) != tt.wantErr) && (err.Error() == tt.expectedError) {
 				t.Errorf("loadConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
