@@ -2,30 +2,26 @@ package pkg
 
 import (
 	"context"
-	"os"
 
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/datadeliverystatus"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/encryption"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/storage/google"
+	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/util"
 	"github.com/rs/zerolog/log"
 )
 
-func loadConfig(name, location string) models.Encrypt {
-	var (
-		encryptionDestination string
-		keyFile               string
-		found                 bool
-	)
-
-	if encryptionDestination, found = os.LookupEnv("ENCRYPTION_DESTINATION"); !found {
-		log.Fatal().Msg("The ENCRYPTION_DESTINATION variable has not been set")
+func loadConfig(name string, location string) (models.Encrypt, error) {
+	encryptionDestination, err := util.EnvironmentVariableExist("ENCRYPTION_DESTINATION")
+	if err != nil {
+		return models.Encrypt{}, err
 	}
 
 	log.Info().Msgf("encrypted destination: %s", encryptionDestination)
 
-	if keyFile, found = os.LookupEnv("PUBLIC_KEY"); !found {
-		log.Fatal().Msg("The PUBLIC_KEY variable has not been set")
+	keyFile, err := util.EnvironmentVariableExist("PUBLIC_KEY")
+	if err != nil {
+		return models.Encrypt{}, err
 	}
 
 	log.Info().Msgf("public key file: %s", keyFile)
@@ -35,7 +31,7 @@ func loadConfig(name, location string) models.Encrypt {
 		FileName:              name,
 		Location:              location,
 		EncryptionDestination: encryptionDestination,
-	}
+	}, nil
 }
 
 // handles event from item arriving in the encrypt bucket
@@ -45,7 +41,11 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 		Str("file", name).
 		Msgf("received encrypt request")
 
-	encryptRequest := loadConfig(name, location)
+	encryptRequest, err := loadConfig(name, location)
+	if err != nil {
+		log.Error().Msgf("Creating encrypt request failed: %s", err.Error())
+		return err
+	}
 
 	r := google.NewStorage(ctx)
 	encrypt := encryption.NewService(&r)
