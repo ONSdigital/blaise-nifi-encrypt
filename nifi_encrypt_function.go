@@ -2,9 +2,7 @@ package blaise_nifi_encrypt
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/api/idtoken"
@@ -15,19 +13,10 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/util"
 )
 
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 func createDataDeliveryStatusClient(client *http.Client) (datadeliverystatus.Client, error) {
-	var (
-		ddsUrl string
-		found  bool
-	)
-
-	if ddsUrl, found = os.LookupEnv("DDS_URL"); !found {
-		log.Fatal().Msg("The DDS_URL variable has not been set")
-		return datadeliverystatus.Client{}, (fmt.Errorf("the DDS_URL variable has not been set"))
+	ddsUrl, err := util.EnvironmentVariableExist("DDS_URL")
+	if err != nil {
+		return datadeliverystatus.Client{}, err
 	}
 
 	dataDeliveryStatusClient := datadeliverystatus.Client{
@@ -37,26 +26,33 @@ func createDataDeliveryStatusClient(client *http.Client) (datadeliverystatus.Cli
 		HTTP: client,
 	}
 
-	return dataDeliveryStatusClient, fmt.Errorf("")
+	return dataDeliveryStatusClient, nil
 }
 
 // handles event from item arriving in the nifi staging bucket
 func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
-	client, err := idtoken.NewClient(ctx, os.Getenv("CLIENT_ID"))
+	util.ConfigureLogging()
+
+	clientId, err := util.EnvironmentVariableExist("CLIENT_ID")
+	if err != nil {
+		return err
+	}
+
+	client, err := idtoken.NewClient(ctx, clientId)
 	if err != nil {
 		log.Error().Msgf("Could not get IAP token for DDS: %s", err.Error())
 		return err
 	}
-	util.ConfigureLogging()
 
 	dataDeliveryStatusClient, err := createDataDeliveryStatusClient(client)
-	if err.Error() != "" {
-		log.Error().Msgf(err.Error())
+	if err != nil {
+		log.Error().Msgf("Trying to create DDS HTTP client failed: %s", err.Error())
 	}
 
 	_, err = dataDeliveryStatusClient.Update(e.Name, "in_staging")
 	if err != nil {
 		log.Error().Msgf("Updating data delivery status to 'in_staging' failed: %s", err.Error())
 	}
+
 	return pkg.HandleEncryptionRequest(ctx, e.Name, e.Bucket, dataDeliveryStatusClient)
 }
