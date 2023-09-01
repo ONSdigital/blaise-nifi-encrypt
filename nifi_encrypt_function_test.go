@@ -22,16 +22,18 @@ func TestNiFiEncryptFunction(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		ctx     context.Context
-		e       models.GCSEvent
-		wantErr bool
+		name          string
+		ctx           context.Context
+		e             models.GCSEvent
+		expectedError string
+		wantErr       bool
 	}{
 		{
-			name:    "CLIENT_ID environment variable is not set up",
-			ctx:     metadata.NewContext(context.Background(), meta),
-			e:       event,
-			wantErr: true,
+			name:          "CLIENT_ID environment variable is not set up",
+			ctx:           metadata.NewContext(context.Background(), meta),
+			e:             event,
+			expectedError: "the CLIENT_ID environment variable has not been set",
+			wantErr:       true,
 		},
 		{
 			name:    "CLIENT_ID environment variable is set with wrong value",
@@ -40,10 +42,11 @@ func TestNiFiEncryptFunction(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "CLIENT_ID environment variable is an empty string",
-			ctx:     metadata.NewContext(context.Background(), meta),
-			e:       event,
-			wantErr: true,
+			name:          "CLIENT_ID environment variable is an empty string",
+			ctx:           metadata.NewContext(context.Background(), meta),
+			e:             event,
+			expectedError: "the CLIENT_ID environment variable is an empty string",
+			wantErr:       true,
 		},
 	}
 
@@ -57,7 +60,7 @@ func TestNiFiEncryptFunction(t *testing.T) {
 			}
 
 			err := NiFiEncryptFunction(tt.ctx, tt.e)
-			if (err != nil) != tt.wantErr {
+			if ((err != nil) != tt.wantErr) && (err.Error() == tt.expectedError) {
 				t.Errorf("NiFiEncryptFunction() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
