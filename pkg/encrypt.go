@@ -54,7 +54,7 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 		log.Warn().Msg("encrypt failed")
 		_, ddsErr := dataDeliveryStatusClient.Error("errored", name, err.Error())
 		if ddsErr != nil {
-			log.Err(err).Msgf("Updating data delivery status to 'errored' failed: %s", ddsErr.Error())
+			log.Error().Msgf("Updating data delivery status to 'errored' failed: %s", ddsErr.Error())
 		}
 		return err
 	}
