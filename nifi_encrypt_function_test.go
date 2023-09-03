@@ -49,7 +49,6 @@ func TestNiFiEncryptFunction(t *testing.T) {
 			wantErr:       true,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.name == "CLIENT_ID environment variable is set with wrong value" {
@@ -92,7 +91,7 @@ func Test_createDataDeliveryStatusClient(t *testing.T) {
 			client: &http.Client{},
 			want: datadeliverystatus.Client{
 				Config: &datadeliverystatus.Config{
-					BaseURL: "www.blaise.com",
+					BaseURL: "www.dds-blaise.com",
 				},
 				HTTP: &http.Client{},
 			},
@@ -106,7 +105,7 @@ func Test_createDataDeliveryStatusClient(t *testing.T) {
 			}
 
 			if tt.name == "DDS_URL environment variable is set up" {
-				t.Setenv("DDS_URL", "www.blaise.com")
+				t.Setenv("DDS_URL", "www.dds-blaise.com")
 			}
 
 			got, err := createDataDeliveryStatusClient(tt.client)
