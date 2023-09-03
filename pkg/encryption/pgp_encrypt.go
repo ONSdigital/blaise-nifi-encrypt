@@ -33,7 +33,7 @@ func NewService(r Repository) Service {
 func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
 	if err != nil {
-		log.Err(err).Msgf("cannot create a reader")
+		log.Error().Msgf("cannot create a reader: %s", err)
 		return err
 	}
 	defer storageReader.Close()
@@ -45,20 +45,20 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	// Read public key
 	recipient, err := readEntity(encryptRequest.KeyFile)
 	if err != nil {
-		log.Err(err).Msgf("cannot read public key")
+		log.Error().Msgf("cannot read public key: %s", err)
 		return err
 	}
 	// Check if public key signatures have expired
 	for _, identity := range recipient.Identities {
 		if identity.SelfSignature.KeyExpired(time.Now()) {
-			err := fmt.Errorf("Key has expired")
-			log.Err(err).Msgf("Cannot use public key for '%s'", identity.Name)
+			err := fmt.Errorf("key has expired")
+			log.Error().Msgf("Cannot use public key for '%s'", identity.Name)
 			return err
 		}
 	}
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
-		log.Err(err).Msgf("encrypt failed")
+		log.Error().Msgf("encrypt failed: %s", err)
 		return err
 	}
 
@@ -71,13 +71,13 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
 	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true}, nil)
 	if err != nil {
-        log.Err(err).Msgf("failed to set up encryption: '%s'", err)
+		log.Error().Msgf("failed to set up encryption: '%s'", err)
 		return err
 	}
 
 	defer wc.Close()
 	if _, err := io.Copy(wc, r); err != nil {
-        log.Err(err).Msgf("failed to fetch content and encrypt: '%s'. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime", err)
+		log.Error().Msgf("failed to fetch content and encrypt: '%s'. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime", err)
 		return err
 	}
 
