@@ -18,7 +18,7 @@ type Storage struct {
 func NewStorage(ctx context.Context) Storage {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Err(err).Msg("Cannot get GCloud Storage Bucket")
+		log.Error().Msgf("Cannot get GCloud Storage Bucket: %s", err)
 		os.Exit(1)
 	}
 
@@ -48,7 +48,7 @@ func (gs *Storage) CloseFile() {
 	if gs.writer != nil {
 		err := gs.writer.Close()
 		if err != nil {
-			log.Err(err).Msg("close bucket writer failed")
+			log.Error().Msgf("close bucket writer failed: %s", err)
 			return
 		}
 		log.Debug().Msg("closed bucket writer")
@@ -61,7 +61,7 @@ func (gs Storage) GetReader(file, directory string) (io.ReadCloser, error) {
 
 	storageReader, err := readObj.NewReader(gs.ctx)
 	if err != nil {
-		log.Err(err).Msgf("cannot create a reader")
+		log.Error().Msgf("cannot create a reader: %s", err)
 		return nil, err
 	}
 
