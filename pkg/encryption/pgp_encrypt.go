@@ -31,21 +31,15 @@ func NewService(r Repository) Service {
 }
 
 func (s service) EncryptFile(encryptRequest models.Encrypt) error {
-	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
-	if err != nil {
-		log.Error().Msgf("cannot create a reader: %s", err)
-		return err
+	if s.r == nil {
+		log.Error().Msgf("Google Storage/Encryption Service is not set")
+		return fmt.Errorf("Google Storage/Encryption Service is not set")
 	}
-	defer storageReader.Close()
-
-	fileName := encryptRequest.FileName
-	storageWriter := s.r.GetWriter(fileName, encryptRequest.EncryptionDestination)
-	defer storageWriter.Close()
 
 	// Read public key
 	recipient, err := readEntity(encryptRequest.KeyFile)
 	if err != nil {
-		log.Error().Msgf("cannot read public key: %s", err)
+		log.Error().Msgf("Encryption/Public key problem: %s", err)
 		return err
 	}
 	// Check if public key signatures have expired
@@ -56,6 +50,17 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 			return err
 		}
 	}
+
+	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
+	if err != nil {
+		log.Error().Msgf("Storage Reader not created for passed file name: %s", err)
+		return err
+	}
+	defer storageReader.Close()
+
+	fileName := encryptRequest.FileName
+	storageWriter := s.r.GetWriter(fileName, encryptRequest.EncryptionDestination)
+	defer storageWriter.Close()
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
 		log.Error().Msgf("encrypt failed: %s", err)
