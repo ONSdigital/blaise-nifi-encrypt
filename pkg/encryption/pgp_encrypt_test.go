@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
-	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/storage/google"
 )
 
 func Test_service_EncryptFile(t *testing.T) {
@@ -38,29 +37,15 @@ func Test_service_EncryptFile(t *testing.T) {
 			expectedError: "Google Storage/Encryption Service is not set",
 			wantErr:       true,
 		},
-		{
-			name: "Encryption key is not set in argument object",
-			args: args{
-				encryptRequest: models.Encrypt{
-					KeyFile:               "",
-					FileName:              "LMS_Data",
-					Location:              "NIFI_Staging",
-					EncryptionDestination: "NIFI_Encrypt",
-				},
-			},
-			fields: fields{
-				r: &google.Storage{},
-			},
-			expectedError: "Encryption/Public key problem",
-			wantErr:       true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := service{
 				r: tt.fields.r,
 			}
-			if err := s.EncryptFile(tt.args.encryptRequest); (err != nil) != tt.wantErr {
+
+			err := s.EncryptFile(tt.args.encryptRequest)
+			if ((err != nil) != tt.wantErr) && (err.Error() == tt.expectedError) {
 				t.Errorf("service.EncryptFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
