@@ -11,7 +11,7 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 )
 
-func TestNiFiEncryptFunction(t *testing.T) {
+func Test_NiFiEncryptFunction(t *testing.T) {
 
 	name := "LMS_DATA.txt"
 	event := models.GCSEvent{
@@ -20,7 +20,6 @@ func TestNiFiEncryptFunction(t *testing.T) {
 	meta := &metadata.Metadata{
 		EventID: "EVENT_ID",
 	}
-
 	tests := []struct {
 		name          string
 		ctx           context.Context
@@ -69,22 +68,25 @@ func TestNiFiEncryptFunction(t *testing.T) {
 
 func Test_createDataDeliveryStatusClient(t *testing.T) {
 	tests := []struct {
-		name    string
-		client  *http.Client
-		want    datadeliverystatus.Client
-		wantErr bool
+		name          string
+		client        *http.Client
+		want          datadeliverystatus.Client
+		wantErr       bool
+		expectedError string
 	}{
 		{
-			name:    "DDS_URL environment variable isn't set up",
-			client:  &http.Client{},
-			want:    datadeliverystatus.Client{},
-			wantErr: true,
+			name:          "DDS_URL environment variable isn't set up",
+			client:        &http.Client{},
+			want:          datadeliverystatus.Client{},
+			wantErr:       true,
+			expectedError: "the DDS_URL environment variable has not been set",
 		},
 		{
-			name:    "DDS_URL environment variable is an empty string",
-			client:  &http.Client{},
-			want:    datadeliverystatus.Client{},
-			wantErr: true,
+			name:          "DDS_URL environment variable is an empty string",
+			client:        &http.Client{},
+			want:          datadeliverystatus.Client{},
+			wantErr:       true,
+			expectedError: "the DDS_URL environment variable is an empty string",
 		},
 		{
 			name:   "DDS_URL environment variable is set up",
@@ -109,8 +111,9 @@ func Test_createDataDeliveryStatusClient(t *testing.T) {
 			}
 
 			got, err := createDataDeliveryStatusClient(tt.client)
-			if (err != nil) != tt.wantErr {
+			if ((err != nil) && tt.wantErr) && (err.Error() != tt.expectedError) {
 				t.Errorf("createDataDeliveryStatusClient() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("createDataDeliveryStatusClient() expected error: %v", tt.expectedError)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
