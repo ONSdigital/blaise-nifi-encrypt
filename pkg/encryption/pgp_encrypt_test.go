@@ -1,7 +1,6 @@
 package encryption
 
 import (
-	"context"
 	"testing"
 
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
@@ -23,7 +22,6 @@ func Test_service_EncryptFile(t *testing.T) {
 		expectedError string
 		wantErr       bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "Google storage repository is not set",
 			args: args{
@@ -51,7 +49,7 @@ func Test_service_EncryptFile(t *testing.T) {
 				},
 			},
 			fields: fields{
-				r: google.NewStorage(context.Background()),
+				r: &google.Storage{},
 			},
 			expectedError: "Encryption/Public key problem",
 			wantErr:       true,
@@ -67,7 +65,7 @@ func Test_service_EncryptFile(t *testing.T) {
 				},
 			},
 			fields: fields{
-				r: google.NewStorage(context.Background()),
+				r: &google.Storage{},
 			},
 			expectedError: "Storage Reader not created for passed file name",
 			wantErr:       true,
