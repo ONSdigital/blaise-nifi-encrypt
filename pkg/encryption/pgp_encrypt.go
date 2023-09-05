@@ -39,21 +39,21 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	// Read public key
 	recipient, err := readEntity(encryptRequest.KeyFile)
 	if err != nil {
-		log.Error().Msgf("Encryption/Public key problem: %s", err)
+		log.Err(err).Msgf("Encryption/Public key problem")
 		return err
 	}
 	// Check if public key signatures have expired
 	for _, identity := range recipient.Identities {
 		if identity.SelfSignature.KeyExpired(time.Now()) {
 			err := fmt.Errorf("key has expired")
-			log.Error().Msgf("Cannot use public key for '%s'", identity.Name)
+			log.Err(err).Msgf("Cannot use public key for '%s'", identity.Name)
 			return err
 		}
 	}
 
 	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
 	if err != nil {
-		log.Error().Msgf("Storage Reader not created for passed file name: %s", err)
+		log.Err(err).Msgf("Storage Reader not created for passed file name")
 		return err
 	}
 	defer storageReader.Close()
@@ -63,11 +63,11 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	defer storageWriter.Close()
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
-		log.Error().Msgf("encrypt failed: %s", err)
+		log.Err(err).Msgf("Encrypt failed")
 		return err
 	}
 
-	log.Info().Msgf("file %s encrypted and saved to %s/%s", encryptRequest.FileName,
+	log.Info().Msgf("File %s encrypted and saved to %s/%s", encryptRequest.FileName,
 		encryptRequest.EncryptionDestination, encryptRequest.FileName)
 
 	return nil
@@ -76,13 +76,13 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
 	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true}, nil)
 	if err != nil {
-		log.Error().Msgf("failed to set up encryption: '%s'", err)
+		log.Err(err).Msg("Failed to set up encryption")
 		return err
 	}
 
 	defer wc.Close()
 	if _, err := io.Copy(wc, r); err != nil {
-		log.Error().Msgf("failed to fetch content and encrypt: '%s'. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime", err)
+		log.Err(err).Msgf("Failed to fetch content and encrypt. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime")
 		return err
 	}
 

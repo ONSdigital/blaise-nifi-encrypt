@@ -40,18 +40,18 @@ func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
 
 	client, err := idtoken.NewClient(ctx, clientId)
 	if err != nil {
-		log.Error().Msgf("Could not get IAP token for DDS: %s", err.Error())
+		log.Err(err).Msgf("Could not get IAP token for DDS")
 		return err
 	}
 
 	dataDeliveryStatusClient, err := createDataDeliveryStatusClient(client)
 	if err != nil {
-		log.Error().Msgf("Trying to create DDS HTTP client failed: %s", err.Error())
+		log.Err(err).Msgf("Trying to create DDS HTTP client failed")
 	}
 
 	_, err = dataDeliveryStatusClient.Update(e.Name, "in_staging")
 	if err != nil {
-		log.Error().Msgf("Updating data delivery status to 'in_staging' failed: %s", err.Error())
+		log.Err(err).Msgf("Updating data delivery status to 'in_staging' failed")
 	}
 
 	return pkg.HandleEncryptionRequest(ctx, e.Name, e.Bucket, dataDeliveryStatusClient)
