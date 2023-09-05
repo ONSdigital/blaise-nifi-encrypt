@@ -39,7 +39,7 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	// Read public key
 	recipient, err := readEntity(encryptRequest.KeyFile)
 	if err != nil {
-		log.Err(err).Msgf("Encryption/Public key problem")
+		log.Err(err).Msgf("Failed to read public key")
 		return err
 	}
 	// Check if public key signatures have expired
