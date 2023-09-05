@@ -45,7 +45,6 @@ func (client *Client) patch(payload []byte, url string) (string, error) {
 	return string(body), nil
 }
 
-// These functions don't seem to deal with whitespaces and empty strings, not sure if this is intentional
 func (client *Client) Update(state, fileName string) (string, error) {
 	payload, err := json.Marshal(map[string]interface{}{
 		"state": state,
