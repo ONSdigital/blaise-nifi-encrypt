@@ -47,7 +47,11 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 		return err
 	}
 
-	r := google.NewStorage(ctx)
+	r, err := google.NewStorage(ctx)
+	if err != nil {
+		log.Err(err).Msg("Could not create GCP storage client")
+		return err
+	}
 	encrypt := encryption.NewService(&r)
 
 	if err := encrypt.EncryptFile(encryptRequest); err != nil {
