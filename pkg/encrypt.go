@@ -43,7 +43,7 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 
 	encryptRequest, err := loadConfig(name, location)
 	if err != nil {
-		log.Error().Msgf("Creating encrypt request failed: %s", err.Error())
+		log.Err(err).Msgf("Creating encrypt request failed")
 		return err
 	}
 
@@ -51,16 +51,15 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 	encrypt := encryption.NewService(&r)
 
 	if err := encrypt.EncryptFile(encryptRequest); err != nil {
-		log.Warn().Msg("encrypt failed")
 		_, ddsErr := dataDeliveryStatusClient.Error("errored", name, err.Error())
 		if ddsErr != nil {
-			log.Error().Msgf("Updating data delivery status to 'errored' failed: %s", ddsErr.Error())
+			log.Err(ddsErr).Msgf("Updating data delivery status to 'errored' failed")
 		}
 		return err
 	}
 	_, ddsErr := dataDeliveryStatusClient.Update("encrypted", name)
 	if ddsErr != nil {
-		log.Error().Msgf("Updating data delivery status to 'encrypted' failed: %s", ddsErr.Error())
+		log.Err(ddsErr).Msgf("Updating data delivery status to 'encrypted' failed")
 	}
 	return nil
 }
