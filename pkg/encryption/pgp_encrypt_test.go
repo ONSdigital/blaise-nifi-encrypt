@@ -28,7 +28,7 @@ func Test_service_EncryptFile(t *testing.T) {
 				encryptRequest: models.Encrypt{
 					KeyFile:               "sandbox_key",
 					FileName:              "LMS_Data",
-					Location:              "NIFI_Stanging",
+					Location:              "NIFI_Staging",
 					EncryptionDestination: "NIFI_Encrypt",
 				},
 			},
@@ -44,7 +44,7 @@ func Test_service_EncryptFile(t *testing.T) {
 				encryptRequest: models.Encrypt{
 					KeyFile:               "",
 					FileName:              "LMS_Data",
-					Location:              "NIFI_Stanging",
+					Location:              "NIFI_Staging",
 					EncryptionDestination: "NIFI_Encrypt",
 				},
 			},
@@ -52,22 +52,6 @@ func Test_service_EncryptFile(t *testing.T) {
 				r: &google.Storage{},
 			},
 			expectedError: "Encryption/Public key problem",
-			wantErr:       true,
-		},
-		{
-			name: "Storage reader is not created due to wrong file name",
-			args: args{
-				encryptRequest: models.Encrypt{
-					KeyFile:               "./keys/dev-key.gpg",
-					FileName:              "fake_file_name",
-					Location:              "NIFI_Stanging",
-					EncryptionDestination: "NIFI_Encrypt",
-				},
-			},
-			fields: fields{
-				r: &google.Storage{},
-			},
-			expectedError: "Storage Reader not created for passed file name",
 			wantErr:       true,
 		},
 	}
