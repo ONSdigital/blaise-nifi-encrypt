@@ -3,7 +3,6 @@ package google
 import (
 	"context"
 	"io"
-	"os"
 
 	"cloud.google.com/go/storage"
 	"github.com/rs/zerolog/log"
@@ -15,14 +14,14 @@ type Storage struct {
 	ctx    context.Context
 }
 
-func NewStorage(ctx context.Context) Storage {
+func NewStorage(ctx context.Context) (Storage, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Err(err).Msgf("Cannot get GCloud Storage Bucket")
-		os.Exit(1)
+		return Storage{}, err
 	}
 
-	return Storage{ctx: ctx, client: client}
+	return Storage{ctx: ctx, client: client}, nil
 }
 
 func (gs *Storage) CreateFile(location, destinationFile string) (io.Writer, error) {
