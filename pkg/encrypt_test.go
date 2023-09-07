@@ -7,7 +7,7 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 )
 
-func Test_loadConfig(t *testing.T) {
+func Test_loadConfig(mainTestCtx *testing.T) {
 	type args struct {
 		name     string
 		location string
@@ -64,31 +64,31 @@ func Test_loadConfig(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "ENCRYPTION_DESTINATION environment variable is an empty string" {
-				t.Setenv("ENCRYPTION_DESTINATION", "")
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			if testCase.name == "ENCRYPTION_DESTINATION environment variable is an empty string" {
+				testContext.Setenv("ENCRYPTION_DESTINATION", "")
 			}
-			if tt.name == "PUBLIC_KEY environment variable is not set" {
-				t.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
+			if testCase.name == "PUBLIC_KEY environment variable is not set" {
+				testContext.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
 			}
-			if tt.name == "PUBLIC_KEY environment variable is an empty string" {
-				t.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
-				t.Setenv("PUBLIC_KEY", "")
+			if testCase.name == "PUBLIC_KEY environment variable is an empty string" {
+				testContext.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
+				testContext.Setenv("PUBLIC_KEY", "")
 			}
-			if tt.name == "ENCRYPTION_DESTINATION and PUBLIC_KEY environment variables are set" {
-				t.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
-				t.Setenv("PUBLIC_KEY", "dummy")
+			if testCase.name == "ENCRYPTION_DESTINATION and PUBLIC_KEY environment variables are set" {
+				testContext.Setenv("ENCRYPTION_DESTINATION", "/tmp/encrypted")
+				testContext.Setenv("PUBLIC_KEY", "dummy")
 			}
 
-			got, err := loadConfig(tt.args.name, tt.args.location)
-			if ((err != nil) && tt.wantErr) && (err.Error() != tt.expectedError) {
-				t.Errorf("loadConfig() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("loadConfig() expected error: %v", tt.expectedError)
+			got, err := loadConfig(testCase.args.name, testCase.args.location)
+			if ((err != nil) && testCase.wantErr) && (err.Error() != testCase.expectedError) {
+				testContext.Errorf("loadConfig() error = %v, wantErr %v", err, testCase.wantErr)
+				testContext.Errorf("loadConfig() expected error: %v", testCase.expectedError)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("loadConfig() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, testCase.want) {
+				testContext.Errorf("loadConfig() = %v, want %v", got, testCase.want)
 			}
 		})
 	}

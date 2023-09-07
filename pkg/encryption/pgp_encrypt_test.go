@@ -7,9 +7,9 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/storage/google"
 )
 
-func Test_service_EncryptFile(t *testing.T) {
+func Test_service_EncryptFile(mainTestCtx *testing.T) {
 	type fields struct {
-		r Repository
+		repository Repository
 	}
 	type args struct {
 		encryptRequest models.Encrypt
@@ -33,7 +33,7 @@ func Test_service_EncryptFile(t *testing.T) {
 				},
 			},
 			fields: fields{
-				r: nil,
+				repository: nil,
 			},
 			expectedError: "Google Storage/Encryption Service is not set",
 			wantErr:       true,
@@ -49,22 +49,22 @@ func Test_service_EncryptFile(t *testing.T) {
 				},
 			},
 			fields: fields{
-				r: &google.Storage{},
+				repository: &google.Storage{},
 			},
 			expectedError: "open : no such file or directory",
 			wantErr:       true,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := service{
-				r: tt.fields.r,
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			service := service{
+				repository: testCase.fields.repository,
 			}
 
-			err := s.EncryptFile(tt.args.encryptRequest)
-			if ((err != nil) && tt.wantErr) && (err.Error() != tt.expectedError) {
-				t.Errorf("service.EncryptFile() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("service.EncryptFile() expected error: %v", tt.expectedError)
+			err := service.EncryptFile(testCase.args.encryptRequest)
+			if ((err != nil) && testCase.wantErr) && (err.Error() != testCase.expectedError) {
+				testContext.Errorf("service.EncryptFile() error = %v, wantErr %v", err, testCase.wantErr)
+				testContext.Errorf("service.EncryptFile() expected error: %v", testCase.expectedError)
 				return
 			}
 		})
