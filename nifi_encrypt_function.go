@@ -2,7 +2,7 @@ package blaise_nifi_encrypt
 
 import (
 	"context"
-	"os"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/api/idtoken"
@@ -13,22 +13,46 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/util"
 )
 
-// handles event from item arriving in the nifi staging bucket
-func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
-	client, err := idtoken.NewClient(ctx, os.Getenv("CLIENT_ID"))
+func createDataDeliveryStatusClient(client *http.Client) (datadeliverystatus.Client, error) {
+	ddsUrl, err := util.EnvironmentVariableExist("DDS_URL")
 	if err != nil {
-		log.Error().Msgf("Could not get IAP token for DDS: %s", err.Error())
+		return datadeliverystatus.Client{}, err
 	}
-	util.ConfigureLogging()
+
 	dataDeliveryStatusClient := datadeliverystatus.Client{
 		Config: &datadeliverystatus.Config{
-			BaseURL: os.Getenv("DDS_URL"),
+			BaseURL: ddsUrl,
 		},
 		HTTP: client,
 	}
+
+	return dataDeliveryStatusClient, nil
+}
+
+// handles event from item arriving in the nifi staging bucket
+func NiFiEncryptFunction(ctx context.Context, e models.GCSEvent) error {
+	util.ConfigureLogging()
+
+	clientId, err := util.EnvironmentVariableExist("CLIENT_ID")
+	if err != nil {
+		return err
+	}
+
+	client, err := idtoken.NewClient(ctx, clientId)
+	if err != nil {
+		log.Err(err).Msgf("Could not get IAP token for DDS")
+		return err
+	}
+
+	dataDeliveryStatusClient, err := createDataDeliveryStatusClient(client)
+	if err != nil {
+		log.Err(err).Msgf("Trying to create DDS HTTP client failed")
+	}
+
 	_, err = dataDeliveryStatusClient.Update(e.Name, "in_staging")
 	if err != nil {
-		log.Error().Msgf("Updating data delivery status to 'in_staging' failed: %s", err.Error())
+		log.Err(err).Msgf("Updating data delivery status to 'in_staging' failed")
 	}
+
 	return pkg.HandleEncryptionRequest(ctx, e.Name, e.Bucket, dataDeliveryStatusClient)
 }

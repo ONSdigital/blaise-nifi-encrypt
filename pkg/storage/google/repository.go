@@ -3,7 +3,6 @@ package google
 import (
 	"context"
 	"io"
-	"os"
 
 	"cloud.google.com/go/storage"
 	"github.com/rs/zerolog/log"
@@ -15,19 +14,19 @@ type Storage struct {
 	ctx    context.Context
 }
 
-func NewStorage(ctx context.Context) Storage {
+func NewStorage(ctx context.Context) (Storage, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Err(err).Msg("Cannot get GCloud Storage Bucket")
-		os.Exit(1)
+		log.Err(err).Msgf("Cannot get GCloud Storage Bucket")
+		return Storage{}, err
 	}
 
-	return Storage{ctx: ctx, client: client}
+	return Storage{ctx: ctx, client: client}, nil
 }
 
 func (gs *Storage) CreateFile(location, destinationFile string) (io.Writer, error) {
 
-	log.Debug().Msgf("creating %s/%s", location, destinationFile)
+	log.Debug().Msgf("Creating %s/%s", location, destinationFile)
 
 	bh := gs.client.Bucket(location)
 	// Next check if the bucket exists
@@ -39,7 +38,7 @@ func (gs *Storage) CreateFile(location, destinationFile string) (io.Writer, erro
 
 	gs.writer = obj.NewWriter(gs.ctx)
 
-	log.Debug().Msgf("file %s/%s created", location, destinationFile)
+	log.Debug().Msgf("File %s/%s created", location, destinationFile)
 
 	return gs.writer, nil
 }
@@ -48,10 +47,10 @@ func (gs *Storage) CloseFile() {
 	if gs.writer != nil {
 		err := gs.writer.Close()
 		if err != nil {
-			log.Err(err).Msg("close bucket writer failed")
+			log.Err(err).Msgf("Close bucket writer failed")
 			return
 		}
-		log.Debug().Msg("closed bucket writer")
+		log.Debug().Msg("Closed bucket writer")
 	}
 }
 
@@ -61,7 +60,7 @@ func (gs Storage) GetReader(file, directory string) (io.ReadCloser, error) {
 
 	storageReader, err := readObj.NewReader(gs.ctx)
 	if err != nil {
-		log.Err(err).Msgf("cannot create a reader")
+		log.Err(err).Msgf("Cannot create a reader")
 		return nil, err
 	}
 
