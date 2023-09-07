@@ -25,7 +25,7 @@ func createCustomRoundTripper(expectedValue string) http.RoundTripper {
 	})
 }
 
-func TestClient_Update(t *testing.T) {
+func TestClient_Update(mainTestCtx *testing.T) {
 	config := &Config{
 		BaseURL: "www.dds-blaise.com",
 	}
@@ -57,24 +57,24 @@ func TestClient_Update(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			client := tt.client
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			client := testCase.client
 
-			got, err := client.Update(tt.args.state, tt.args.fileName)
+			got, err := client.Update(testCase.args.state, testCase.args.fileName)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.Update() error = %v, wantErr %v", err, tt.wantErr)
+			if (err != nil) != testCase.wantErr {
+				testContext.Errorf("Client.Update() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Client.Update() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				testContext.Errorf("Client.Update() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
 }
 
-func TestClient_Error(t *testing.T) {
+func TestClient_Error(mainTestCtx *testing.T) {
 	config := &Config{
 		BaseURL: "www.dds-blaise.com",
 	}
@@ -108,17 +108,17 @@ func TestClient_Error(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			client := tt.client
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			client := testCase.client
 
-			got, err := client.Error(tt.args.state, tt.args.fileName, tt.args.errorMessage)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.Error() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := client.Error(testCase.args.state, testCase.args.fileName, testCase.args.errorMessage)
+			if (err != nil) != testCase.wantErr {
+				testContext.Errorf("Client.Error() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Client.Error() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				testContext.Errorf("Client.Error() = %v, want %v", got, testCase.want)
 			}
 		})
 	}

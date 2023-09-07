@@ -11,7 +11,7 @@ import (
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 )
 
-func Test_NiFiEncryptFunction(t *testing.T) {
+func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 
 	name := "LMS_DATA.txt"
 	event := models.GCSEvent{
@@ -48,25 +48,25 @@ func Test_NiFiEncryptFunction(t *testing.T) {
 			wantErr:       true,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "CLIENT_ID environment variable is set with wrong value" {
-				t.Setenv("CLIENT_ID", "dummy")
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			if testCase.name == "CLIENT_ID environment variable is set with wrong value" {
+				testContext.Setenv("CLIENT_ID", "dummy")
 			}
-			if tt.name == "CLIENT_ID environment variable is an empty string" {
-				t.Setenv("CLIENT_ID", "")
+			if testCase.name == "CLIENT_ID environment variable is an empty string" {
+				testContext.Setenv("CLIENT_ID", "")
 			}
 
-			err := NiFiEncryptFunction(tt.ctx, tt.e)
-			if ((err != nil) != tt.wantErr) && (err.Error() == tt.expectedError) {
-				t.Errorf("NiFiEncryptFunction() error = %v, wantErr %v", err, tt.wantErr)
+			err := NiFiEncryptFunction(testCase.ctx, testCase.e)
+			if ((err != nil) != testCase.wantErr) && (err.Error() == testCase.expectedError) {
+				testContext.Errorf("NiFiEncryptFunction() error = %v, wantErr %v", err, testCase.wantErr)
 			}
 		})
 	}
 
 }
 
-func Test_createDataDeliveryStatusClient(t *testing.T) {
+func Test_createDataDeliveryStatusClient(mainTestCtx *testing.T) {
 	tests := []struct {
 		name          string
 		client        *http.Client
@@ -100,24 +100,24 @@ func Test_createDataDeliveryStatusClient(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "DDS_URL environment variable is an empty string" {
-				t.Setenv("DDS_URL", "")
+	for _, testCase := range tests {
+		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+			if testCase.name == "DDS_URL environment variable is an empty string" {
+				testContext.Setenv("DDS_URL", "")
 			}
 
-			if tt.name == "DDS_URL environment variable is set up" {
-				t.Setenv("DDS_URL", "www.dds-blaise.com")
+			if testCase.name == "DDS_URL environment variable is set up" {
+				testContext.Setenv("DDS_URL", "www.dds-blaise.com")
 			}
 
-			got, err := createDataDeliveryStatusClient(tt.client)
-			if ((err != nil) && tt.wantErr) && (err.Error() != tt.expectedError) {
-				t.Errorf("createDataDeliveryStatusClient() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("createDataDeliveryStatusClient() expected error: %v", tt.expectedError)
+			got, err := createDataDeliveryStatusClient(testCase.client)
+			if ((err != nil) && testCase.wantErr) && (err.Error() != testCase.expectedError) {
+				testContext.Errorf("createDataDeliveryStatusClient() error = %v, wantErr %v", err, testCase.wantErr)
+				testContext.Errorf("createDataDeliveryStatusClient() expected error: %v", testCase.expectedError)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("createDataDeliveryStatusClient() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, testCase.want) {
+				testContext.Errorf("createDataDeliveryStatusClient() = %v, want %v", got, testCase.want)
 			}
 		})
 	}

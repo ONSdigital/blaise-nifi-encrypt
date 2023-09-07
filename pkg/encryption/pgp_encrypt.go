@@ -23,15 +23,15 @@ type Service interface {
 }
 
 type service struct {
-	r Repository
+	repository Repository
 }
 
-func NewService(r Repository) Service {
-	return &service{r}
+func NewService(repository Repository) Service {
+	return &service{repository}
 }
 
-func (s service) EncryptFile(encryptRequest models.Encrypt) error {
-	if s.r == nil {
+func (service service) EncryptFile(encryptRequest models.Encrypt) error {
+	if service.repository == nil {
 		log.Error().Msgf("Google Storage/Encryption Service is not set")
 		return fmt.Errorf("Google Storage/Encryption Service is not set")
 	}
@@ -51,7 +51,7 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 		}
 	}
 
-	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
+	storageReader, err := service.repository.GetReader(encryptRequest.FileName, encryptRequest.Location)
 	if err != nil {
 		log.Err(err).Msgf("Storage Reader not created for passed file name")
 		return err
@@ -59,7 +59,7 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 	defer storageReader.Close()
 
 	fileName := encryptRequest.FileName
-	storageWriter := s.r.GetWriter(fileName, encryptRequest.EncryptionDestination)
+	storageWriter := service.repository.GetWriter(fileName, encryptRequest.EncryptionDestination)
 	defer storageWriter.Close()
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
