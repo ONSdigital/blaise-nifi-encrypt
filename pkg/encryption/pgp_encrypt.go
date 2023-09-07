@@ -23,46 +23,51 @@ type Service interface {
 }
 
 type service struct {
-	r Repository
+	repository Repository
 }
 
-func NewService(r Repository) Service {
-	return &service{r}
+func NewService(repository Repository) Service {
+	return &service{repository}
 }
 
-func (s service) EncryptFile(encryptRequest models.Encrypt) error {
-	storageReader, err := s.r.GetReader(encryptRequest.FileName, encryptRequest.Location)
-	if err != nil {
-		log.Err(err).Msgf("cannot create a reader")
-		return err
+func (service service) EncryptFile(encryptRequest models.Encrypt) error {
+	if service.repository == nil {
+		log.Error().Msgf("Google Storage/Encryption Service is not set")
+		return fmt.Errorf("Google Storage/Encryption Service is not set")
 	}
-	defer storageReader.Close()
-
-	fileName := encryptRequest.FileName
-	storageWriter := s.r.GetWriter(fileName, encryptRequest.EncryptionDestination)
-	defer storageWriter.Close()
 
 	// Read public key
 	recipient, err := readEntity(encryptRequest.KeyFile)
 	if err != nil {
-		log.Err(err).Msgf("cannot read public key")
+		log.Err(err).Msgf("Failed to read public key")
 		return err
 	}
 	// Check if public key signatures have expired
 	for _, identity := range recipient.Identities {
 		if identity.SelfSignature.KeyExpired(time.Now()) {
-			err := fmt.Errorf("Key has expired")
+			err := fmt.Errorf("key has expired")
 			log.Err(err).Msgf("Cannot use public key for '%s'", identity.Name)
 			return err
 		}
 	}
 
+	storageReader, err := service.repository.GetReader(encryptRequest.FileName, encryptRequest.Location)
+	if err != nil {
+		log.Err(err).Msgf("Storage Reader not created for passed file name")
+		return err
+	}
+	defer storageReader.Close()
+
+	fileName := encryptRequest.FileName
+	storageWriter := service.repository.GetWriter(fileName, encryptRequest.EncryptionDestination)
+	defer storageWriter.Close()
+
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
-		log.Err(err).Msgf("encrypt failed")
+		log.Err(err).Msgf("Encrypt failed")
 		return err
 	}
 
-	log.Info().Msgf("file %s encrypted and saved to %s/%s", encryptRequest.FileName,
+	log.Info().Msgf("File %s encrypted and saved to %s/%s", encryptRequest.FileName,
 		encryptRequest.EncryptionDestination, encryptRequest.FileName)
 
 	return nil
@@ -71,13 +76,13 @@ func (s service) EncryptFile(encryptRequest models.Encrypt) error {
 func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
 	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true}, nil)
 	if err != nil {
-        log.Err(err).Msgf("failed to set up encryption: '%s'", err)
+		log.Err(err).Msg("Failed to set up encryption")
 		return err
 	}
 
 	defer wc.Close()
 	if _, err := io.Copy(wc, r); err != nil {
-        log.Err(err).Msgf("failed to fetch content and encrypt: '%s'. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime", err)
+		log.Err(err).Msgf("Failed to fetch content and encrypt. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime")
 		return err
 	}
 
