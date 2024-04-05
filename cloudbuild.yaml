@@ -6,8 +6,10 @@ steps:
       - "-c"
       - |
         gcloud functions deploy NiFiEncryptFunction \
-          --runtime go116 \
+          --gen2 \
+          --runtime go122 \
           --region=europe-west2 \
-          --trigger-event=google.storage.object.finalize \
+          --entry-point=NiFiEncryptFunction \
+          --trigger-event=google.cloud.storage.object.v1.finalized \
           --trigger-resource=$_NIFI_STAGING_BUCKET \
           --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$_ENV-key.gpg',ENCRYPTION_DESTINATION='$_NIFI_BUCKET,DDS_URL='$_ENV_DDS_URL'

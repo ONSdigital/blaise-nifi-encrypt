@@ -1,8 +1,9 @@
 module github.com/ONSDigital/blaise-nifi-encrypt
 
-go 1.19
+go 1.22.0
 
 require (
+	cloud.google.com/go v0.78.0
 	cloud.google.com/go/storage v1.13.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.2.0
 	github.com/mattn/go-colorable v0.1.8
@@ -12,9 +13,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.78.0 // indirect
 	github.com/cloudevents/sdk-go/v2 v2.3.1 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.2.0 // indirect
@@ -22,8 +21,6 @@ require (
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/lightstep/tracecontext.go v0.0.0-20181129014701-1757c391b1ac // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	go.opencensus.io v0.22.6 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
@@ -41,6 +38,5 @@ require (
 	google.golang.org/genproto v0.0.0-20210222212404-3e1e516060db // indirect
 	google.golang.org/grpc v1.35.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.1.2 // indirect
 )
