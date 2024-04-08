@@ -9,7 +9,7 @@ steps:
           --gen2 \
           --runtime go122 \
           --region=europe-west2 \
-          --source=.
+          --source=.\
           --entry-point=NiFiEncryptFunction \
           --trigger-event=google.cloud.storage.object.v1.finalized \
           --trigger-resource=$_NIFI_STAGING_BUCKET \
