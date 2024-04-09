@@ -18,7 +18,7 @@ jobs:
           go-version: '1.22'
       - name: Run coverage
         run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
-      - name: Codecov Upload
+      - name: Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
