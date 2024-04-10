@@ -10,6 +10,7 @@ steps:
           --source=.
           --runtime=go122
           --region=europe-west2 \
+          --entry-point=NiFiEncryptFunction \
           --trigger-event=google.cloud.storage.object.v1.finalized \
           --trigger-resource=$_NIFI_STAGING_BUCKET \
           --set-env-vars PUBLIC_KEY='./serverless_function_source_code/pkg/encryption/keys/$_ENV-key.gpg',ENCRYPTION_DESTINATION='$_NIFI_BUCKET,DDS_URL='$_ENV_DDS_URL' \
