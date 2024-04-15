@@ -39,9 +39,9 @@ If you want pretty coloured output for local testing use `Terminal`
 
 ```sh
 gcloud functions deploy NiFiEncryptFunction \
-  --runtime go113 \
+  --runtime go122 \
   --region=europe-west2 \
-  --trigger-event=google.storage.object.finalize \
+  --trigger-event=google.cloud.storage.object.v1.finalized \
   --trigger-resource="${NIFI_STAGING_BUCKET}" \
   --set-env-vars PUBLIC_KEY="./serverless_function_source_code/pkg/encryption/keys/${ENV}-key.gpg,ENCRYPTION_DESTINATION=${NIFI_BUCKET}"
 ```
