@@ -35,6 +35,8 @@ If you want pretty coloured output for local testing use `Terminal`
 
 * `Debug=True|False|NotSet` - set debugging
 
+WOAH A CHANGE!
+
 ## Manual deploy
 
 ```sh
