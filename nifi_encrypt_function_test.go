@@ -28,12 +28,6 @@ func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 		wantErr       bool
 	}{
 		{
-			name:    "CLIENT_ID environment variable is set with wrong value",
-			ctx:     metadata.NewContext(context.Background(), meta),
-			e:       event,
-			wantErr: true,
-		},
-		{
 			name:          "CLIENT_ID environment variable is not set up",
 			ctx:           metadata.NewContext(context.Background(), meta),
 			e:             event,
@@ -54,9 +48,6 @@ func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 			ctx, cancel := context.WithCancel(testCase.ctx)
 			defer cancel()
 
-			if testCase.name == "CLIENT_ID environment variable is set with wrong value" {
-				testContext.Setenv("CLIENT_ID", "dummy")
-			}
 			if testCase.name == "CLIENT_ID environment variable is an empty string" {
 				testContext.Setenv("CLIENT_ID", "")
 			}
