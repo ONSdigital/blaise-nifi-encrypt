@@ -50,6 +50,10 @@ func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 	}
 	for _, testCase := range tests {
 		mainTestCtx.Run(testCase.name, func(testContext *testing.T) {
+
+			ctx, cancel := context.WithCancel(testCase.ctx)
+			defer cancel()
+
 			if testCase.name == "CLIENT_ID environment variable is set with wrong value" {
 				testContext.Setenv("CLIENT_ID", "dummy")
 			}
@@ -57,7 +61,7 @@ func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 				testContext.Setenv("CLIENT_ID", "")
 			}
 
-			err := NiFiEncryptFunction(testCase.ctx, testCase.e)
+			err := NiFiEncryptFunction(ctx, testCase.e)
 			if ((err != nil) != testCase.wantErr) && (err.Error() == testCase.expectedError) {
 				testContext.Errorf("NiFiEncryptFunction() error = %v, wantErr %v", err, testCase.wantErr)
 			}
