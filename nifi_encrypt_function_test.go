@@ -28,17 +28,17 @@ func Test_NiFiEncryptFunction(mainTestCtx *testing.T) {
 		wantErr       bool
 	}{
 		{
+			name:    "CLIENT_ID environment variable is set with wrong value",
+			ctx:     metadata.NewContext(context.Background(), meta),
+			e:       event,
+			wantErr: true,
+		},
+		{
 			name:          "CLIENT_ID environment variable is not set up",
 			ctx:           metadata.NewContext(context.Background(), meta),
 			e:             event,
 			expectedError: "the CLIENT_ID environment variable has not been set",
 			wantErr:       true,
-		},
-		{
-			name:    "CLIENT_ID environment variable is set with wrong value",
-			ctx:     metadata.NewContext(context.Background(), meta),
-			e:       event,
-			wantErr: true,
 		},
 		{
 			name:          "CLIENT_ID environment variable is an empty string",
