@@ -62,13 +62,13 @@ func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 	storageWriter := service.repository.GetWriter(fileName, encryptRequest.EncryptionDestination)
 	defer storageWriter.Close()
 
+	start := time.Now()
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
 		log.Err(err).Msgf("Encrypt failed")
 		return err
 	}
-
-	log.Info().Msgf("File %s encrypted and saved to %s/%s", encryptRequest.FileName,
-		encryptRequest.EncryptionDestination, encryptRequest.FileName)
+	duration := time.Since(start)
+	log.Info().Dur("duration", duration).Msgf("Encryption completed for file %s", fileName)
 
 	return nil
 }
