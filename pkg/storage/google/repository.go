@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"io"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/rs/zerolog/log"
@@ -58,7 +59,8 @@ func (gs Storage) GetReader(file, directory string) (io.ReadCloser, error) {
 	readBucket := gs.client.Bucket(directory)
 	readObj := readBucket.Object(file)
 
-	storageReader, err := readObj.NewReader(gs.ctx)
+	ctx, _ := context.WithTimeout(gs.ctx, 30*time.Minute)
+	storageReader, err := readObj.NewReader(ctx)
 	if err != nil {
 		log.Err(err).Msgf("Cannot create a reader")
 		return nil, err
@@ -71,6 +73,7 @@ func (gs Storage) GetWriter(file, directory string) io.WriteCloser {
 	writeBucket := gs.client.Bucket(directory)
 	writeObj := writeBucket.Object(file)
 
-	storageWriter := writeObj.NewWriter(gs.ctx)
+	ctx, _ := context.WithTimeout(gs.ctx, 30*time.Minute)
+	storageWriter := writeObj.NewWriter(ctx)
 	return storageWriter
 }

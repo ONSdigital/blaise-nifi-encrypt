@@ -81,8 +81,9 @@ func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.
 	}
 
 	defer wc.Close()
+	log.Info().Msg("Starting to copy and encrypt file content")
 	if _, err := io.Copy(wc, r); err != nil {
-		log.Err(err).Msgf("Failed to fetch content and encrypt. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime")
+		log.Err(err).Str("error_details", err.Error()).Msgf("Failed to fetch content and encrypt. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime")
 		return err
 	}
 
