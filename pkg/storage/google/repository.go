@@ -75,5 +75,10 @@ func (gs Storage) GetWriter(file, directory string) io.WriteCloser {
 
 	ctx, _ := context.WithTimeout(gs.ctx, 30*time.Minute)
 	storageWriter := writeObj.NewWriter(ctx)
+	
+	// Set optimal chunk size for large file uploads (16MB)
+	// This reduces the number of API calls and improves performance
+	storageWriter.ChunkSize = 16 * 1024 * 1024
+	
 	return storageWriter
 }

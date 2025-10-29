@@ -39,7 +39,7 @@ func HandleEncryptionRequest(ctx context.Context, name, location string, dataDel
 	log.Info().
 		Str("location", location).
 		Str("file", name).
-		Msgf("received encrypt request")
+		Msgf("Received encrypt request for file %s", name)
 
 	encryptRequest, err := loadConfig(name, location)
 	if err != nil {
