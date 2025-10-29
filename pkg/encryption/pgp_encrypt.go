@@ -64,9 +64,9 @@ func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 	defer storageWriter.Close()
 
 	// Add buffering for better performance with large files
-	// 1MB buffer size for efficient I/O
-	bufferedReader := bufio.NewReaderSize(storageReader, 1024*1024)
-	bufferedWriter := bufio.NewWriterSize(storageWriter, 1024*1024)
+	// 4MB buffer size for more efficient I/O with large files
+	bufferedReader := bufio.NewReaderSize(storageReader, 4*1024*1024)
+	bufferedWriter := bufio.NewWriterSize(storageWriter, 4*1024*1024)
 	defer bufferedWriter.Flush()
 
 	start := time.Now()
@@ -84,17 +84,7 @@ func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 }
 
 func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
-	// Configure packet config for better memory efficiency with large files
-	config := &packet.Config{
-		DefaultCipher: packet.CipherAES256,
-		// Use stronger compression for better network efficiency
-		DefaultCompressionAlgo: packet.CompressionZIP,
-		CompressionConfig: &packet.CompressionConfig{
-			Level: 6, // Balanced compression level
-		},
-	}
-	
-	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true}, config)
+	wc, err := openpgp.Encrypt(w, recip, signer, &openpgp.FileHints{IsBinary: true})
 	if err != nil {
 		log.Err(err).Msg("Failed to set up encryption")
 		return err
