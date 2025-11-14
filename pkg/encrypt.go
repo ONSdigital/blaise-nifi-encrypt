@@ -17,14 +17,14 @@ func loadConfig(name string, location string) (models.Encrypt, error) {
 		return models.Encrypt{}, err
 	}
 
-	log.Info().Msgf("encrypted destination: %s", encryptionDestination)
+	log.Info().Msgf("encrypted destination: %s for %s", encryptionDestination, name)
 
 	keyFile, err := util.EnvironmentVariableExist("PUBLIC_KEY")
 	if err != nil {
 		return models.Encrypt{}, err
 	}
 
-	log.Info().Msgf("public key file: %s", keyFile)
+	log.Info().Msgf("public key file: %s for %s", keyFile, name)
 
 	return models.Encrypt{
 		KeyFile:               keyFile,
@@ -36,14 +36,14 @@ func loadConfig(name string, location string) (models.Encrypt, error) {
 
 // handles event from item arriving in the encrypt bucket
 func HandleEncryptionRequest(ctx context.Context, name, location string, dataDeliveryStatusClient datadeliverystatus.Client) error {
-	log.Info().
-		Str("location", location).
-		Str("file", name).
-		Msgf("received encrypt request")
+    log.Info().
+        Str("location", location).
+        Str("file", name).
+        Msgf("received encrypt request for %s", name)
 
 	encryptRequest, err := loadConfig(name, location)
 	if err != nil {
-		log.Err(err).Msgf("Creating encrypt request failed")
+		log.Err(err).Msgf("Creating encrypt request failed for %s", name)
 		return err
 	}
 
