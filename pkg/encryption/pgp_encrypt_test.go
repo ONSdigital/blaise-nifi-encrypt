@@ -35,7 +35,7 @@ func Test_service_EncryptFile(mainTestCtx *testing.T) {
 			fields: fields{
 				repository: nil,
 			},
-			expectedError: "Google Storage/Encryption Service is not set",
+			expectedError: "google storage/encryption service is not set",
 			wantErr:       true,
 		},
 		{
