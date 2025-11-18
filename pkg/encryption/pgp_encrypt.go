@@ -32,7 +32,7 @@ func NewService(repository Repository) Service {
 
 func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 	if service.repository == nil {
-		log.Error().Msgf("Google Storage/Encryption Service is not set")
+		log.Error().Msgf("google storage/encryption service is not set")
 		return fmt.Errorf("google storage/encryption service is not set")
 	}
 
