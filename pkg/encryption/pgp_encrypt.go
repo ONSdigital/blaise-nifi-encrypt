@@ -8,9 +8,9 @@ import (
 
 	"github.com/ONSDigital/blaise-nifi-encrypt/pkg/models"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
-	"golang.org/x/crypto/openpgp/packet"
+	"golang.org/x/crypto/openpgp"        //nolint:staticcheck
+	"golang.org/x/crypto/openpgp/armor"  //nolint:staticcheck
+	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
 )
 
 type Repository interface {
@@ -32,8 +32,8 @@ func NewService(repository Repository) Service {
 
 func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 	if service.repository == nil {
-		log.Error().Msgf("Google Storage/Encryption Service is not set")
-		return fmt.Errorf("Google Storage/Encryption Service is not set")
+		log.Error().Msgf("google storage/encryption service is not set")
+		return fmt.Errorf("google storage/encryption service is not set")
 	}
 
 	// Read public key
@@ -56,11 +56,19 @@ func (service service) EncryptFile(encryptRequest models.Encrypt) error {
 		log.Err(err).Msgf("Storage Reader not created for passed file name")
 		return err
 	}
-	defer storageReader.Close()
+	defer func() {
+		if err := storageReader.Close(); err != nil {
+			log.Err(err).Msgf("Failed to close storageReader: %v", err)
+		}
+	}()
 
 	fileName := encryptRequest.FileName
 	storageWriter := service.repository.GetWriter(fileName, encryptRequest.EncryptionDestination)
-	defer storageWriter.Close()
+	defer func() {
+		if err := storageWriter.Close(); err != nil {
+			log.Err(err).Msgf("Failed to close storageWriter: %v", err)
+		}
+	}()
 
 	if err := encrypt([]*openpgp.Entity{recipient}, nil, storageReader, storageWriter); err != nil {
 		log.Err(err).Msgf("Encrypt failed")
@@ -80,7 +88,11 @@ func encrypt(recip []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.
 		return err
 	}
 
-	defer wc.Close()
+	defer func() {
+		if err := wc.Close(); err != nil {
+			log.Err(err).Msgf("Failed to close wc: %v", err)
+		}
+	}()
 	if _, err := io.Copy(wc, r); err != nil {
 		log.Err(err).Msgf("Failed to fetch content and encrypt. Updating the Go version could fix tcp connection errors according to https://github.com/googleapis/google-cloud-go/issues/1253 and https://cloud.google.com/functions/docs/concepts/go-runtime")
 		return err
@@ -94,7 +106,11 @@ func readEntity(name string) (*openpgp.Entity, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Printf("failed to close file: %v\n", err)
+		}
+	}()
 	block, err := armor.Decode(f)
 	if err != nil {
 		return nil, err
