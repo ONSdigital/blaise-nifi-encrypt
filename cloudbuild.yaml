@@ -8,7 +8,7 @@ steps:
         gcloud functions deploy NiFiEncryptFunction \
           --gen2 \
           --source=.
-          --runtime=go123
+          --runtime=go126
           --region=europe-west2 \
           --entry-point=NiFiEncryptFunction \
           --trigger-event=google.cloud.storage.object.v1.finalized \
