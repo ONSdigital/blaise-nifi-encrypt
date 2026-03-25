@@ -1,6 +1,6 @@
 module github.com/ONSDigital/blaise-nifi-encrypt
 
-go 1.26.0
+go 1.26.1
 
 require (
 	cloud.google.com/go/functions v1.19.7
