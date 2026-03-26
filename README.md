@@ -39,7 +39,7 @@ If you want pretty coloured output for local testing use `Terminal`
 
 ```sh
 gcloud functions deploy NiFiEncryptFunction \
-  --runtime go122 \
+  --runtime go126 \
   --region=europe-west2 \
   --trigger-event=google.cloud.storage.object.v1.finalized \
   --trigger-resource="${NIFI_STAGING_BUCKET}" \
