@@ -12,7 +12,7 @@ permissions:
   security-events: write
   actions: read
 jobs:
-  analyze:
+  run-codeql-analyser:
     runs-on: ubuntu-latest
     steps:
       - name: 🛎️ Checkout Repository
