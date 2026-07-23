@@ -14,7 +14,7 @@ jobs:
       - name: 🛎️ Checkout Repository
         uses: actions/checkout@v7
       - name: 🔧 Setup Go and Cache
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v7
         with:
           go-version: 1.26
           cache: true
