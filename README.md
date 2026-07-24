@@ -1,64 +1,42 @@
 
-# Blaise NiFi Encrypt
+# Blaise NiFi Encrypt 🔣
 
-The encrypt function is triggered when a file arrives in a bucket, which is defined in the function configuration.
-The file is encrypted using the build-in Golang PGP encryption functions with the stipulated public key and the
-result placed in the bucket identified by the `ENCRYPTION_DESTINATION` environment variable.
+The encrypt function is triggered when a file arrives in a GCS bucket (configured as the function trigger). The file is encrypted using `golang.org/x/crypto/openpgp` with the configured public key, and the result is written to the bucket identified by the `ENCRYPTION_DESTINATION` environment variable.
 
-The Golang libraries allow for the streaming of data into and out of the encryption routines with the result being
-that any sized file can be encrypted without being constrained by memory
-or storage considerations.
+Data is streamed directly between GCS and the encryption routines, so files of any size can be encrypted without memory or storage constraints.
 
-## Configuration
+## Environment variables
 
-### Google Functions region setting
+The following environment variables are required:
 
-Set the default functions region:
+* `PUBLIC_KEY=<path to gpg public key file>` - path to the PGP public key used to encrypt files
 
-`gcloud config set functions/region europe-west2`
+* `ENCRYPTION_DESTINATION=<bucket>` - GCS bucket where encrypted files are written
 
-Otherwise, functions will be created somewhere far away in the ether...
+* `DDS_URL=<url>` - base URL of the Data Delivery Status service
 
-### Environment variables
+* `CLIENT_ID=<client-id>` - IAP client ID used to authenticate requests to the Data Delivery Status service
 
-The following environment variables are available (see the testing section for details on how to create buckets):
+The following environment variables are optional:
 
-* `PUBLIC_KEY=<path to gpg public key file>` - required to encrypt the zip file
+* `LOG_FORMAT=Terminal|Json` - log output format (default: `Json`). Use `Terminal` for human-readable coloured output during local development.
 
-* `ENCRYPTION_DESTINATION=<bucket>` - the GCloud bucket where the file that has been encrypted is located.
-Placed there by the `nifi_encrypt_function`.
+* `DEBUG=true` - enables debug-level logging when set to `true`
 
-* `GOOGLE_APPLICATION_CREDENTIALS=<file>` - google credentials file
+## Running Tests
 
-* `LOG_FORMAT=Terminal|Json` - (json is the default) for logging messages.
-If you want pretty coloured output for local testing use `Terminal`
-
-* `Debug=True|False|NotSet` - set debugging
-
-## Manual deploy
+Run the test suite from the repository root:
 
 ```sh
-gcloud functions deploy NiFiEncryptFunction \
-  --runtime go126 \
-  --region=europe-west2 \
-  --trigger-event=google.cloud.storage.object.v1.finalized \
-  --trigger-resource="${NIFI_STAGING_BUCKET}" \
-  --set-env-vars PUBLIC_KEY="./serverless_function_source_code/pkg/encryption/keys/${ENV}-key.gpg,ENCRYPTION_DESTINATION=${NIFI_BUCKET}"
+go test -v ./...
 ```
 
-## Running Test Cases
+To verify changes against a live environment:
 
-To run the test cases, you need to be in the directory where TESTFILE_test.go file exists.
-Run the following command to run the test cases and see the results
-```sh
-go test -v
-```
-To make sure that the changes you have made are working and have not broken anything:
-
-* Point your sandbox to the feature Branch that you are working on
-* Put some sample file into "nifi_staging" Bucket in your GCP Project ons-blaise-v2-dev-<sandbox-suffix>
-* Make sure everything is working expectedly, concourse/sandbox is not broken and it encrypts the file and places it in "nifi" Bucket for your GCP Project ons-blaise-v2-dev-<sandbox-suffix>
+* Point your sandbox to the feature branch you are working on
+* Upload a sample file to the `nifi_staging` bucket in your GCP project (`ons-blaise-v2-dev-<sandbox-suffix>`)
+* Confirm the file is encrypted and written to the `nifi` bucket in the same project
 
 ## Encryption key management
 
-The CIA team are responsible for generating the PGP encryption keys. When they expire the CIA team will send us new public keys, they will need to [overwrite the existing public keys in this repository](https://github.com/ONSdigital/blaise-nifi-encrypt/tree/main/pkg/encryption/keys).
+The Ingest team are responsible for generating the PGP encryption keys. When they expire, the Ingst team will provide new public keys which will need to be [committed to this repository](https://github.com/ONSdigital/blaise-nifi-encrypt/tree/main/pkg/encryption/keys).

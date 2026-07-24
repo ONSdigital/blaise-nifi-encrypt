@@ -25,10 +25,10 @@ type DataDeliveryStatus interface {
 
 func (client *Client) patch(payload []byte, url string) (string, error) {
 	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(payload))
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		return "", err
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.HTTP.Do(req)
 	if err != nil {
