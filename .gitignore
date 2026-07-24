@@ -1,3 +1,2 @@
-/.idea/
-scripts/.env.yaml
-.DS_Store
+.idea/
+.vscode/

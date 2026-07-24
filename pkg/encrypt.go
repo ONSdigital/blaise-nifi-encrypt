@@ -36,10 +36,10 @@ func loadConfig(name string, location string) (models.Encrypt, error) {
 
 // handles event from item arriving in the encrypt bucket
 func HandleEncryptionRequest(ctx context.Context, name, location string, dataDeliveryStatusClient datadeliverystatus.Client) error {
-    log.Info().
-        Str("location", location).
-        Str("file", name).
-        Msgf("received encrypt request for %s", name)
+	log.Info().
+		Str("location", location).
+		Str("file", name).
+		Msgf("received encrypt request for %s", name)
 
 	encryptRequest, err := loadConfig(name, location)
 	if err != nil {
